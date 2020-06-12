@@ -844,11 +844,17 @@ public class HiveConnection implements java.sql.Connection {
     }
 
     // set the session configuration
-    Map<String, String> sessVars = connParams.getSessionVars();
-    if (sessVars.containsKey(HiveAuthConstants.HS2_PROXY_USER)) {
+    if (sessConfMap.containsKey(HiveAuthConstants.HS2_PROXY_USER)) {
       openConf.put(HiveAuthConstants.HS2_PROXY_USER,
-          sessVars.get(HiveAuthConstants.HS2_PROXY_USER));
+          sessConfMap.get(HiveAuthConstants.HS2_PROXY_USER));
     }
+
+    // set create external purge table by default
+    if (sessConfMap.containsKey(JdbcConnectionParams.CREATE_TABLE_AS_EXTERNAL) &&
+        sessConfMap.get(JdbcConnectionParams.CREATE_TABLE_AS_EXTERNAL).toLowerCase().equals("true")) {
+      openConf.put("set:hiveconf:hive.create.as.external", "true");
+    }
+
     openReq.setConfiguration(openConf);
 
     // Store the user name in the open request in case no non-sasl authentication
